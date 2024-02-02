@@ -1,0 +1,8 @@
+Django==3.2.5
+mysqlclient==2.0.3
+djangorestframework
+markdown
+django-filter
+social-auth-app-django
+openai
+git+https://github.com/miurahr/pykakasi
