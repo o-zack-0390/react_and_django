@@ -1,0 +1,57 @@
+version: "3.9"
+services:
+  mysql:
+    image: 'mysql:8.1.0'
+    environment:
+      - 'MYSQL_DATABASE=mydatabase'
+      - 'MYSQL_PASSWORD=secret'
+      - 'MYSQL_ROOT_PASSWORD=verysecret'
+      - 'MYSQL_USER=myuser'
+    ports:
+      - 3306:3306
+  redis:
+    image: "redis:6.2.13"
+    ports:
+      - "6379:6379"
+  adminer:
+    container_name: adminer
+    hostname: adminer
+    image: adminer:4.8.1
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysql
+  react:
+    container_name: react
+    build:
+      context: .
+      dockerfile: DockerfileForReact
+    volumes:
+    - type: bind
+      source: ./react
+      target: /AI_Novel_Typing/frontend
+    command: sh -c "cd /AI_Novel_Typing/frontend && yarn start" 
+    ports:
+      - 3000:3000
+    stdin_open: true
+  django:
+    build:
+      context: .
+      dockerfile: DockerfileForDjango
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - type: bind
+        source: .
+        target: /AI_Novel_Typing/backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_ENGINE=django.db.backends.mysql
+      - DB_NAME=mydatabase
+      - DB_USER=myuser
+      - DB_PASSWORD=secret
+      - DB_HOST=mysql
+      - DB_PORT=3306
+    depends_on:
+      - mysql
